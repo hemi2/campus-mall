@@ -208,7 +208,7 @@ export default {
     align-items: center;
     flex-wrap: wrap;
     display: flex;
-    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .address .list.on {
@@ -221,7 +221,7 @@ export default {
     position: relative;
     width: 25%;
     font-size: 14px;
-    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .address .content {
