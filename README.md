@@ -1,3 +1,4 @@
+# 校园商城服务平台
 # campus-mall
 
 ## Project setup
