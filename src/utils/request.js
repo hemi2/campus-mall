@@ -7,7 +7,7 @@ import { getToken } from '@/utils/auth'
 // axios.defaults.baseURL = "http://localhost:9090/api"; 
 
 //开发模式
-axios.defaults.baseURL = "http://192.168.3.32:8082/api";
+axios.defaults.baseURL = "http://localhost:8082/api";
 
 // 创建一个axios对象出来
 const request = axios.create({

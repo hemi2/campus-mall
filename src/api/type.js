@@ -9,7 +9,7 @@ export function getTypeList() {
 
 export function getTypeById(id) {
   return request({
-    url: 'type/selectById' + id,
+    url: 'type/selectById/' + id,
     method: 'get',
   })
 }
