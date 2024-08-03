@@ -82,9 +82,6 @@ router.beforeEach(async (to, from, next) => {
 
           // 动态添加可访问路由
           router.addRoutes(accessRoutes)
-
-          // hack method to ensure that addRoutes is complete
-          // set the replace: true, so the navigation will not leave a history record
           next({ ...to, replace: true })
 
         } catch (err) {
@@ -106,7 +103,6 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-// Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
 export function resetRouter() {
   const newRouter = createRouter()
   router.matcher = newRouter.matcher // reset router
