@@ -3,7 +3,7 @@
     <el-row class="goods-list">
       <el-col
         :span="5"
-        v-for="(item, index) in goods"
+        v-for="(item, index) in goodsList"
         :key="item.id"
         :offset="index % 4 > 0 ? 1 : 0"
         style="margin-bottom: 20px"
@@ -43,7 +43,6 @@ export default {
   },
   data() {
     return {
-      goods: this.goodsList,
       // 初始化防抖处理的函数
       debouncedGetGoods: null,
       loadMoreInfo: "下拉加载更多",
@@ -64,7 +63,7 @@ export default {
       }
     },
     fetchMoreGoods() {
-      this.$emit("fetchMoreGoodsEnven", this.goods);
+      this.$emit("fetchMoreGoodsEnven");
     },
   },
   mounted() {
@@ -83,8 +82,6 @@ export default {
   },
   watch: {
     goodsList(newVal, oldVal) {
-      this.goods = newVal;
-      this.loadMoreInfo = "下拉加载更多";
       if (newVal.length === oldVal.length) {
         this.loadMoreInfo = "无更多内容";
       }
