@@ -2,9 +2,9 @@
     <div>
         <div class="address">
             <slot name="title"></slot>
-            <div class="list" :class="isShowAll ? 'on' : isShowMore ? 'on' : ''">
-                <div class="item" :class="item.id === currentAddressId ? 'on' : ''" v-for="item in addressData"
-                    :key="item.id" @click="selectAddress(item)">
+            <div :class="['list', { on: isShowAll || isShowMore }]">
+                <div :class="['item', { on: item.id === currentAddressId }]" v-for="item in addressData" :key="item.id"
+                    @click="selectAddress(item)">
                     <div class="content">
                         <div class="name">{{ item.name }}</div>
                         <div class="phone">{{ item.phone }}</div>

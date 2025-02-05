@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="user-manager">
     <div>
       <el-input style="width: 200px" placeholder="查询名称" v-model="name"></el-input>
       <el-button type="primary" style="margin-left: 10px" @click="load(1)">查询</el-button>
@@ -40,8 +40,8 @@
       </el-pagination>
     </div>
 
-    <el-dialog title="信息" :visible.sync="fromVisible" width="40%" :close-on-click-modal="false">
-      <el-form :model="form" label-width="80px" style="padding-right: 20px" :rules="rules" ref="formRef">
+    <el-dialog title="用户信息" :visible.sync="fromVisible" width="40%" :close-on-click-modal="false">
+      <el-form :model="form" label-width="80px" style="padding-right: 20px" :rules="formRules" ref="formRef">
 
         <el-form-item label="头像" prop="avatar" ref="uploadCover">
           <el-upload class="avatar-uploader" :action="$baseUrl + '/files/upload'" :show-file-list="false"
@@ -81,43 +81,37 @@ import request from "@/utils/request";
 import { getToken } from '@/utils/auth'
 
 export default {
-  name: "type",
+  name: "UserManager",
   data() {
+    // 表单验证规则提取
+    const validateAvatar = (rule, value, callback) => {
+      if (!this.form.avatar) {
+        callback(new Error('请上传头像'));
+      } else {
+        callback();
+      }
+    };
+
     return {
-      tableData: [],  // 所有的数据
-      pageNum: 1,   // 当前的页码
-      pageSize: 10,  // 每页显示的个数
-      name: '',     //查询名称
+      tableData: [],
+      pageNum: 1,
+      pageSize: 10,
+      name: '',
       total: 0,
       fromVisible: false,
       form: {},
-      rules: {
-        userName: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-        ],
-        password: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-        ],
+      formRules: {
+        userName: [{ required: true, message: '请输入用户名称', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
         email: [
           { required: true, message: '请输入邮箱', trigger: 'blur' },
           { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
         ],
-        role: [
-          { required: true, message: '请选择身份', trigger: 'blur' },
-        ],
-        avatar: [{
-          validator: (rule, value, callback) => {
-            if (this.form.avatar === '' || this.form.avatar === undefined) {
-              callback(new Error('请上传图片'));
-            } else {
-              callback();
-            }
-          },
-          trigger: 'change'
-        },
-        ],
+        role: [{ required: true, message: '请选择用户身份', trigger: 'blur' }],
+        avatar: [{ validator: validateAvatar, trigger: 'change' }]
       },
       ids: [],
+      loading: false
     }
   },
   computed: {
@@ -126,6 +120,55 @@ export default {
     }
   },
   methods: {
+    async load(pageNum = this.pageNum) {
+      try {
+        this.loading = true
+        const { data } = await request.get('/user/selectByPage', {
+          params: {
+            pageNum,
+            pageSize: this.pageSize,
+            name: this.name.trim()
+          }
+        })
+        this.tableData = data.records
+        this.total = data.total
+      } catch (error) {
+        this.$message.error('数据加载失败')
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async sendSaveRequest() {
+      try {
+        const { code, msg } = await request({
+          url: this.form.userId ? '/user/update' : '/user/add',
+          method: this.form.userId ? 'PUT' : 'POST',
+          data: this.form
+        })
+        
+        if (code === '0') {
+          this.$message.success('保存成功')
+          this.fromVisible = false
+          await this.load(1)
+        } else {
+          this.$message.error(msg || '操作失败')
+        }
+      } catch (error) {
+        this.$message.error('操作失败')
+      }
+    },
+
+    handleCoverSuccess(res) {
+      if (res.code === '0') {
+        this.form.avatar = res.data
+        this.$refs.uploadCover.clearValidate()
+        this.$message.success('上传成功')
+      } else {
+        this.$message.error(res.msg || '上传失败')
+      }
+    },
+
     delBatch() {
       if (!this.ids.length) {
         this.$message.warning('请选择数据')
@@ -173,49 +216,12 @@ export default {
         }
       })
     },
-    sendSaveRequest() {
-      request({
-        url: this.form.userId ? '/user/update' : '/user/add',
-        method: this.form.userId ? 'PUT' : 'POST',
-        data: this.form
-      }).then(res => {
-        if (res.code === '0') {  // 表示成功保存
-          this.$message.success('保存成功')
-          this.load(1)
-          this.fromVisible = false
-        } else {
-          this.$message.error(res.msg)  // 弹出错误的信息
-        }
-      })
-    },
     reset() {
       this.name = ''
       this.load()
     },
-    load(pageNum) {  // 分页查询
-      if (pageNum) this.pageNum = pageNum
-      request.get('/user/selectByPage', {
-        params: {
-          pageNum: this.pageNum,
-          pageSize: this.pageSize,
-          name: this.name
-        }
-      }).then(res => {
-        console.log(res);
-        this.tableData = res.data.records
-        this.total = res.data.total
-      })
-    },
     handleCurrentChange(pageNum) {
       this.load(pageNum)
-    },
-    handleCoverSuccess(res) {
-      if (res.code === '0') {
-        // 清空校验
-        this.$refs.uploadCover.clearValidate();
-        this.form.avatar = res.data
-        this.$message.success('上传成功')
-      }
     },
   },
   created() {
@@ -224,4 +230,12 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.user-manager {
+  padding: 20px;
+  
+  .avatar-uploader {
+    display: inline-block;
+  }
+}
+</style>

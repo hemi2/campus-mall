@@ -5,14 +5,15 @@ module.exports = defineConfig({
 
   devServer: {
     proxy: {
-      '/api': { // 被代理的接口名
-        target: 'http://localhost:9090', // url地址
-        changeOrigin: true, // 发送请求头中 host 是否设置成 target
-        pathRewrite: { // 重定向
-          '^/api': ''
+      '/api': {
+        target: 'http://localhost:9527', // 服务器地址
+        changeOrigin: true, // 是否跨域
+        pathRewrite: {
+          '^/api': '/api' // 重写路径
         }
       }
     }
-  },
+  }
+
 
 })
